@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>农产品流通与食品产业设施专项债案例库（60例）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fa;color:#1f2937;padding:20px}
+h1{font-size:22px;margin-bottom:4px}
+.sub{color:#6b7280;font-size:12px;margin-bottom:16px}
+.kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.kpi{flex:1;min-width:150px;background:#fff;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.kpi .v{font-size:24px;font-weight:700;color:#1d4ed8}
+.kpi .l{font-size:12px;color:#6b7280;margin-top:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.panel{background:#fff;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.panel h3{font-size:14px;margin-bottom:10px;color:#374151}
+.bar-row{display:flex;align-items:center;margin:4px 0;font-size:12px}
+.bar-row .bl{width:120px;text-align:right;padding-right:8px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-row .btrack{flex:1;display:flex;flex-direction:column;gap:2px}
+.bar{height:10px;border-radius:3px}
+.bar.ti{background:#3b82f6}.bar.bond{background:#f59e0b}
+.bar-row .bv{width:64px;padding-left:6px;color:#6b7280}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{padding:6px 12px;border-radius:16px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:12px}
+.tab.on{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+input[type=text],select{padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:12px;background:#fff}
+th{background:#eef2ff;color:#374151;padding:8px 6px;text-align:left;cursor:pointer;white-space:nowrap;position:sticky;top:0}
+td{padding:7px 6px;border-top:1px solid #f3f4f6}
+tr.case:hover{background:#f0f6ff;cursor:pointer}
+tr.detail td{background:#f9fafb;color:#4b5563;line-height:1.7}
+.star{color:#f59e0b}
+.cov-na{color:#9ca3af}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px}
+.legend{font-size:11px;color:#6b7280;margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 12px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<h1>农产品流通与食品产业设施专项债案例库</h1>
+<div class="sub">6类 × 10例 = 60个核验案例 · 总投资合计640.64亿元 / 专项债合计318.10亿元 · 数据源《专项债案例库60条.csv》(2026-10-09核验版) · 离线单文件，仅供研究参考，以官方披露为准</div>
+<div class="kpis" id="kpis"></div>
+<div class="grid2">
+  <div class="panel"><h3>六大类投资对比（亿元）</h3><div id="catChart"></div>
+    <div class="legend"><i style="background:#3b82f6"></i>总投资 <i style="background:#f59e0b"></i>专项债</div></div>
+  <div class="panel"><h3>省份分布（17省）</h3><div id="provChart"></div></div>
+  <div class="panel"><h3>覆盖倍数分布（34例已披露，均值2.12）</h3><div id="covChart"></div></div>
+  <div class="panel"><h3>借鉴价值评分 Top10</h3><div id="topChart"></div></div>
+</div>
+<div class="panel">
+  <div class="tabs" id="tabs"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+    <input type="text" id="q" placeholder="搜索项目/收益来源…" style="flex:1;min-width:200px">
+    <select id="provSel"><option value="">全部省份</option></select>
+    <select id="tiSel">
+      <option value="">全部投资</option><option value="5">≥5亿</option>
+      <option value="10">≥10亿</option><option value="20">≥20亿</option>
+    </select>
+    <select id="sortSel">
+      <option value="id">按编号</option><option value="ti-">总投资↓</option>
+      <option value="bond-">专项债↓</option><option value="score-">评分↓</option>
+      <option value="cov-">覆盖倍数↓</option>
+    </select>
+  </div>
+  <table><thead><tr>
+    <th data-k="id">编号</th><th data-k="name">项目名称</th><th data-k="prov">省·市</th>
+    <th data-k="ti">总投(亿)</th><th data-k="bond">专债(亿)</th><th data-k="bondPct">专债占比</th>
+    <th data-k="cov">覆盖倍数</th><th data-k="score">评分</th><th>来源域名</th>
+  </tr></thead><tbody id="tbody"></tbody></table>
+  <div class="legend" id="cnt"></div>
+</div>
+<script>
+const CASES = [{"id": "ALG-001", "cat": "ALG", "catName": "农产品物流园", "name": "平顶山市农产品智慧冷链物流产业园项目", "prov": "河南", "city": "平顶山市", "ti": 16.75, "bond": 7.45, "cov": 1.39, "score": 90, "rev": ["智慧恒温冷库、普通冷库租赁收入", "交易佣金收入", "商铺档口、大棚档口租赁收入", "办公用房租赁收入"], "status": "已核实", "dom": "czj.pds.gov.cn"}, {"id": "ALG-002", "cat": "ALG", "catName": "农产品物流园", "name": "菏泽高新区冷链物流中心", "prov": "山东", "city": "菏泽市", "ti": 40.64, "bond": 15.0, "cov": 1.23, "score": 75, "rev": ["冷库租赁收入", "冷链物流运输收入", "仓库租赁收入", "其他服务收入"], "status": "已核实", "dom": "czt.shandong.gov.cn"}, {"id": "ALG-003", "cat": "ALG", "catName": "农产品物流园", "name": "湛江国家骨干冷链物流基地——国际水产城(一期)", "prov": "广东", "city": "湛江市", "ti": 11.94, "bond": 9.55, "cov": 2.35, "score": 70, "rev": ["标准冷库出租收入（100元/㎡/月、每年上调1%、出租率90%）", "产品展销平台出租收入（45元/㎡/月、每年上调1%、出租率90%）", "物业管理费收入（4元/㎡/月×127,277平方米、每年上调1%）", "车位出租收入（506个车位）"], "status": "已核实", "dom": "file.finance.sina.com.cn"}, {"id": "ALG-004", "cat": "ALG", "catName": "农产品物流园", "name": "宁波农副产品物流中心二期（冷链物流中心）", "prov": "浙江", "city": "宁波市", "ti": 17.38, "bond": 1.0, "cov": 13.66, "score": 60, "rev": ["冷库租赁（首年2.9元/㎡/天×78,319平方米，运营期首年出租率100%，租金每3年递增5%）", "冻品交易区租赁（首年1,700元/㎡/年×45,995平方米，出租率100%，每3年递增5%）", "其他配套设施租赁（首年500元/㎡/年×73,922平方米，前四年出租率30%/60%/80%/100%）", "车库租赁（首年1,000万元/年，前四年出租率30%/60%/80%/100%）"], "status": "已核实", "dom": "czj.ningbo.gov.cn"}, {"id": "ALG-005", "cat": "ALG", "catName": "农产品物流园", "name": "长三角一体化来安县特色农产品产业基地建设项目", "prov": "安徽", "city": "滁州市", "ti": 3.41, "bond": 2.5, "cov": 1.29, "score": 58, "rev": ["出租收入（产业园温室大棚、农副产品加工中心、农产品研发检测中心、生活设施配套中心及物流园农产品交易批发市场、农产品仓库、恒温冷链仓库）", "出售收入（上述部分资产）", "停车场停车费收入", "物业管理费收入"], "status": "已核实", "dom": "file.finance.sina.com.cn"}, {"id": "ALG-006", "cat": "ALG", "catName": "农产品物流园", "name": "广东供销天业(台山)冷链物流园", "prov": "广东", "city": "江门市", "ti": 1.75, "bond": 1.4, "cov": 2.32, "score": 58, "rev": ["冷库租金收入（3.00元/吨/天，每3年递增3%，出租率60%→95%，运营期合计27,942.76万元）", "冻冰袋收入（400吨/年×400元/吨，运营期合计529.48万元）", "其他杂费收入（装卸费、搬运费、复冻费、打膜费及综合管理费，按冷库租金收入的30%计，合计8,382.83万元）", "冷库自营水产品收入（400吨/年×14,000元/吨×年周转3次，运营期合计57,375.97万元）"], "status": "已核实", "dom": "file.finance.sina.com.cn"}, {"id": "ALG-007", "cat": "ALG", "catName": "农产品物流园", "name": "中江冷链物流园基础设施建设项目", "prov": "四川", "city": "德阳市", "ti": 8.9, "bond": 4.0, "cov": null, "score": 56, "rev": ["冷库出租收入（1.5元/㎡/天起、每3年递增5%、出租率65%→85%封顶）", "农副产品交易市场摊位出租收入（1元/㎡/天、可租面积56,000平方米、出租率60%→85%）", "停车费收入（约2,080个车位，参考德阳市及中江县停车收费标准）", "充电桩服务费收入"], "status": "已核实", "dom": "file.finance.sina.com.cn"}, {"id": "ALG-008", "cat": "ALG", "catName": "农产品物流园", "name": "叙永县农产品冷链物流园建设项目", "prov": "四川", "city": "泸州市", "ti": 3.2, "bond": 2.3, "cov": null, "score": 50, "rev": ["冷冻仓储库租金收入", "普通仓库租金收入", "农产品交易区租金收入", "物流配送中心租金收入"], "status": "已核实", "dom": "file.finance.sina.com.cn"}, {"id": "ALG-009", "cat": "ALG", "catName": "农产品物流园", "name": "彭州市农产品集散中心及物流仓储基地项目", "prov": "四川", "city": "成都市", "ti": 2.56, "bond": 2.05, "cov": null, "score": 50, "rev": ["冷藏保鲜库等租赁收入（增值税率9%）", "水果交易区、蔬菜交易区租金收入", "停车位收入", "充电桩服务收入（增值税率6%）"], "status": "已核实", "dom": "file.finance.sina.com.cn"}, {"id": "ALG-010", "cat": "ALG", "catName": "农产品物流园", "name": "凯德冷链现代物流园区项目", "prov": "山东", "city": "德州市", "ti": 2.07, "bond": 1.65, "cov": null, "score": 50, "rev": ["仓储收入（冷冻能力5万吨：首年1.2元/吨/天×出租率50%，次年1.6元/吨/天×70%，第三年起1.5元/吨/天×80%）", "进出库及装卸服务收入（月周转率30%，进出库费20元/吨、装卸费30元/吨）", "停车费收入（运输车辆30元/天封顶+小型厢货车10元/天封顶）", "租赁收入（办公楼13元/㎡/月×5,000平方米、加工厂房11元/㎡/月×30,000平方米）"], "status": "已核实", "dom": "shandong.gov.cn"}, {"id": "AWM-001", "cat": "AWM", "catName": "农产品批发市场", "name": "山东济南公益性农产品大宗交易批发市场（二期项目）", "prov": "山东", "city": "济南市长清区", "ti": 22.59, "bond": 2.0, "cov": 1.87, "score": 70, "rev": ["铺位/设备区出租（2.2元/㎡/日，可租约18.62万㎡，出租率70%逐年升至90%）", "冷库出租（2.3元/㎡/日，可租约1.50万㎡）", "物流配送区出租（1.0元/㎡/日，可租约14.33万㎡）", "停车收入（450个车位，300元/位/月）"], "status": "已核实", "dom": "file.finance.sina.com.cn"}, {"id": "AWM-002", "cat": "AWM", "catName": "农产品批发市场", "name": "吉安县凤凰镇农产品批发市场建设项目", "prov": "江西", "city": "吉安市吉安县", "ti": 1.14, "bond": 0.83, "cov": 1.25, "score": 68, "rev": ["农产品仓储及加工车间出租（16元/㎡/月，存续期合计2920.56万元）", "交易中心及展示中心摊位出租（700元/个/月×800个，合计16890.14万元）", "农产品电商及附属用房出租（20元/㎡/月×13810㎡，合计7888.31万元）", "停车位收入"], "status": "已核实", "dom": "file.finance.sina.com.cn"}, {"id": "AWM-003", "cat": "AWM", "catName": "农产品批发市场", "name": "邛崃市西南农产品综合批发市场项目", "prov": "四川", "city": "成都市邛崃市", "ti": 6.0, "bond": 4.8, "cov": 1.25, "score": 64, "rev": ["农产品批发市场商铺出租（初始20元/㎡/月，年增2.5%，出租率60%渐增至98%，存续期合计90613.75万元）", "农产品集散中心出租（初始15元/㎡/月，合计16232.17万元）", "气调库出租（初始22元/㎡/月，合计5410.72万元）", "物业费收入（初始3元/㎡/月，合计17707.82万元）"], "status": "已核实（财务评价报告全文核实投资/规模/7类收入/覆盖倍数1", "dom": "file.finance.sina.com.cn"}, {"id": "AWM-004", "cat": "AWM", "catName": "农产品批发市场", "name": "仁寿县农食交易中心建设项目（一期）", "prov": "四川", "city": "眉山市仁寿县", "ti": 2.5, "bond": 0.5, "cov": null, "score": 58, "rev": ["基础租赁收益（县属国企铧锐公司提供场地、冻库及设备租赁服务，以租金收入覆盖项目投资资金利息）", "贸易垫资服务（与入驻果商合作，筛选优质下游贸易国企提供垫资支持并收取贸易回报）", "产销资源整合（引入外地优质销售渠道提供订单支持、按单提取利润；引进外地水果进场分选包装，填补仁寿柑橘下市期间场地空置率、做大销售产值）", "电商品牌打造（聚焦'仁礼寿香'核心品牌，先以本地网红抖音橱窗搭建电商矩阵，达标后引入外部大V带货）"], "status": "已核实（三源交叉且均为WebFetch原文：眉山市公共资源交", "dom": "msggzy.org.cn"}, {"id": "AWM-005", "cat": "AWM", "catName": "农产品批发市场", "name": "湟源县绿色有机农畜产品集散中心建设项目", "prov": "青海", "city": "西宁市湟源县", "ti": 1.53, "bond": 0.65, "cov": 1.84, "score": 58, "rev": ["批发零售区租金收入（存续期合计1214.82万元）", "冷链仓储租金收入（合计1854.24万元）", "加工车间租金收入（合计6231.72万元）", "停车费收入（合计3898.20万元）"], "status": "已核实（实施方案+财务评价报告+事前绩效评估三份官网PDF交", "dom": "huangyuan.gov.cn"}, {"id": "AWM-006", "cat": "AWM", "catName": "农产品批发市场", "name": "马尔康市天府夏繁特色农产品批发市场建设项目", "prov": "四川", "city": "阿坝藏族羌族自治州马尔康市", "ti": 1.36, "bond": 1.0, "cov": null, "score": 58, "rev": ["物业租赁收入", "停车位运营收入", "广告位运营收入", "充电桩运营收入"], "status": "已核实（法律意见书+州发改委官网信息交叉印证；2026年20", "dom": "file.finance.sina.com.cn"}, {"id": "AWM-007", "cat": "AWM", "catName": "农产品批发市场", "name": "美姑县县城农产品批发市场建设项目", "prov": "四川", "city": "凉山彝族自治州美姑县", "ti": 1.07, "bond": 0.65, "cov": 1.6, "score": 58, "rev": ["房屋建筑出租收入", "停车位收入", "充电桩服务收入", "物业收入"], "status": "已核实（官网预算文件+发行明细聚合页交叉印证）", "dom": "meigu.gov.cn"}, {"id": "AWM-008", "cat": "AWM", "catName": "农产品批发市场", "name": "闽清县福果农产品批发市场项目", "prov": "福建", "city": "福州市闽清县", "ti": 5.09, "bond": 2.1, "cov": 1.21, "score": 54, "rev": ["农产品加工生产基础设施出租（45元/㎡/月，每三年增5%，存续期合计37538.65万元）", "农产品加工生产附属设施出租（茶园1000亩/茶山620亩/林地550亩/柑桔基地500亩/农田1070.23亩/产业园100亩，2000元/亩/年起，每三年增5%，合计16498.88万元）", "配套用房出租（13530㎡，50元/㎡/月，每三年增5%，合计17438.79万元）", "停车场及充电桩收入（停车位175个日均20元/个、充电桩35座0.9元/kWh，合计4023.95万元）"], "status": "已核实（本批3500万元随2024年第三批福建省政府专项债券", "dom": "file.finance.sina.com.cn"}, {"id": "AWM-009", "cat": "AWM", "catName": "农产品批发市场", "name": "株洲市荷塘区农产品冷链物流配送体系建设项目", "prov": "湖南", "city": "株洲市荷塘区", "ti": 4.26, "bond": 2.0, "cov": 1.47, "score": 48, "rev": ["冷链仓储用房出租（73505.6㎡，20元/㎡/月起、年涨1%，出租率70%/80%渐增至90%，合计28731.37万元）", "物流分拨中心及综合服务中心、车库出租（45858.6㎡，21元/㎡/月起、年涨2%）", "停车位收入（330个，18.5元/个/天起、年涨1%）", "充电桩服务费收入（100个60kWh直流桩，0.7元/kWh，电费上缴电网不计入收益）"], "status": "已核实", "dom": "file.finance.sina.com.cn"}, {"id": "AWM-010", "cat": "AWM", "catName": "农产品批发市场", "name": "海南中部（琼中）二级农产品批发市场（一期）项目", "prov": "海南", "city": "琼中黎族苗族自治县", "ti": 1.21, "bond": 0.72, "cov": 1.2, "score": 48, "rev": ["租赁收入", "物业管理费收入", "停车服务收入", "土地出让收入"], "status": "已核实", "dom": "qiongzhong.hainan.gov.cn"}, {"id": "CBE-001", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "南宁综合保税区二期保税物流产业园", "prov": "广西", "city": "南宁市", "ti": 20.78, "bond": 3.5, "cov": 1.77, "score": 80, "rev": ["保税物流中心和保税加工中心以及查验冷库收入", "货物包装分拣服务外包收入", "货物装卸服务外包收入", "厂房及配套用房/仓库出租收入"], "status": "已核实（WebFetch读取联合资信评级公告全文）", "dom": "governbond.org.cn"}, {"id": "CBE-002", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "商丘市跨境电商产业园项目", "prov": "河南", "city": "商丘市虞城县", "ti": 15.0, "bond": 7.0, "cov": null, "score": 80, "rev": ["云仓及仓储物流厂房出租", "冷库出租", "博览交易中心/沿街商业出租", "创意孵化楼、电商产业生态园、总部基地及研发中心出租"], "status": "已核实（WebFetch读取实施方案全文）", "dom": ""}, {"id": "CBE-003", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "中国(湖南)自由贸易试验区黄花国际贸易港智慧物流一期建设项目", "prov": "湖南", "city": "长沙市长沙县", "ti": 153.88, "bond": 75.0, "cov": null, "score": 77, "rev": ["智能仓库出租收入", "冷链仓库出租收入", "服务用房出租收入", "广告牌出租收入"], "status": "已核实（WebFetch读取绩效评价报告全文）", "dom": "czt.hunan.gov.cn"}, {"id": "CBE-004", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "粤港澳大湾区跨境电商基地基础设施建设项目", "prov": "广东", "city": "佛山市南海区", "ti": 34.2, "bond": 25.65, "cov": null, "score": 70, "rev": ["广告牌出租收入", "停车位收费收入", "广佛新城电子信息产业社区物业出租收入"], "status": "已核实（WebFetch读取财务评价报告全文）", "dom": ""}, {"id": "CBE-005", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "东兴跨境经济合作区口岸物流产业园项目一期工程", "prov": "广西", "city": "防城港市东兴市", "ti": 9.27, "bond": 3.0, "cov": 1.49, "score": 64, "rev": ["仓库/冷库出租收入", "口岸查验及装卸服务收入", "接驳钢棚及配套用房出租收入", "停车收入"], "status": "已核实（WebFetch读取实施方案与专项评价报告全文）", "dom": "czt.gxzf.gov.cn"}, {"id": "CBE-006", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "黄石临空跨境电商产业园（基础设施及配套工程）", "prov": "湖北", "city": "黄石市下陆区", "ti": 6.9, "bond": 4.2, "cov": null, "score": 64, "rev": ["仓储出租（1#/2#仓及冷链仓，已入驻品创电商、邻家供应链、零食很忙等6家企业，入驻率75%）", "综合服务楼出租（浙江必创团队运营，已入驻华翔供应链、富晶电子商务等39家企业，入驻率75%）", "冷链仓储及园区配套运营收入（3号冷链仓服务多多买菜鄂东中心仓，日均约40万单、年销售额18亿元以上）"], "status": "已核实（两轮WebFetch/WebSearch读取政府网多", "dom": "xialuqu.gov.cn"}, {"id": "CBE-007", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "重庆两路寸滩保税港区智慧贸易服务基础设施工程", "prov": "重庆", "city": "两江新区", "ti": 6.9, "bond": 4.31, "cov": null, "score": 64, "rev": ["空港贸易功能区孵化楼办公租赁收入（29,483.48㎡按40%出租，50元/㎡·月，每2年上浮5%）", "孵化楼室内车位出租收入（299个车位中120个出租，400元/个·月）", "智慧展馆及办公用房租赁收入（18,000㎡按40%出租，50元/㎡·月）", "两路组团J13-11/05地块出让净收益（29,200㎡二类居住用地，计划2029年出让，预测出让收入141,726.12万元）"], "status": "已核实（第二轮WebFetch读取项目情况全文，补齐专债43", "dom": "file.finance.sina.com.cn"}, {"id": "CBE-008", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "潍坊市保税区跨境电商国际快件综合运营中心项目", "prov": "山东", "city": "潍坊市", "ti": 4.0, "bond": 2.6, "cov": 1.34, "score": 63, "rev": ["1#监管仓库出租（3.5元/㎡·日）", "2#高标准仓库出租（2.4元/㎡·日）", "3#保税冷链仓库出租（3.5元/㎡·日）"], "status": "已核实（WebFetch读取专项评价报告+实施方案全文）", "dom": "shandong.gov.cn"}, {"id": "CBE-009", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "中国—东盟跨境电商物流集散中心项目（凭祥浦寨）", "prov": "广西", "city": "崇左市凭祥市", "ti": 4.7, "bond": 0.4, "cov": 1.4, "score": 58, "rev": ["厂房及配套用房出租收入", "仓库出租收入", "广告收入", "停车位收入"], "status": "已核实（第二轮WebFetch读取联合资信评级公告全文，补齐", "dom": "governbond.org.cn"}, {"id": "CBE-010", "cat": "CBE", "catName": "跨境电商出海服务中心", "name": "珠海高栏港综保区配套产业园区A2地块建设项目", "prov": "广东", "city": "珠海市金湾区", "ti": 3.27, "bond": 0.65, "cov": null, "score": 58, "rev": ["丙1类仓库租金收入", "丙2类仓库租金收入", "园区配套用房租金收入（收益来源为租金收入，各资产租金单价与逐年明细未在已获取部分披露，分项按项目建设内容对应可租资产列示）"], "status": "已核实（第二轮WebSearch读取2026年十六期募投报告", "dom": "file.finance.sina.com.cn"}, {"id": "CCS-001", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "博兴县鲁北智能冷链储运中心项目", "prov": "山东", "city": "滨州市", "ti": 20.21, "bond": 9.8, "cov": null, "score": 72, "rev": ["冷库及仓储出租（正常年10,315.78万元）", "加工车间及配套用房出租", "仓单质押监管服务（1,031.58万元）", "包装服务（900万元）"], "status": "已发行（2022年1月首发20,000万元，后续分期待发）", "dom": ""}, {"id": "CCS-002", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "临沂综合保税区冷链物流仓储分拨中心项目", "prov": "山东", "city": "临沂市", "ti": 4.37, "bond": 2.1, "cov": null, "score": 58, "rev": ["冷库出租（75元/㎡/月，参考日照/沂南/青岛行情定价）", "分拣中心出租（30元/㎡/月）", "物业管理费（2元/㎡）", "装卸劳务（20元/吨，年周转10次）"], "status": "已发行（2020/2021/2022年三次累计21,000万", "dom": ""}, {"id": "CCS-003", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "利辛县冷链物流中心项目", "prov": "安徽", "city": "亳州市", "ti": 2.8, "bond": 1.94, "cov": 1.5, "score": 58, "rev": ["冷库出租（35元/㎡/月，每3年递增5%，出租率75%→85%→95%）", "仓储仓库出租（15元/㎡/月）", "大宗交易棚厅摊位出租（1,800元/个/月×560个）", "配套服务用房出租（18元/㎡/月）"], "status": "部分发行（2021年5,000万元+调入1,900万元；20", "dom": ""}, {"id": "CCS-004", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "定安县城乡冷链物流一体化基础设施项目", "prov": "海南", "city": "定安县", "ti": 1.83, "bond": 0.55, "cov": 1.22, "score": 58, "rev": ["冷库租赁", "厂房租赁", "综合服务楼及宿舍出租", "物业费"], "status": "已安排发行（2025年度资金5,500万元已下达，项目接近完", "dom": ""}, {"id": "CCS-005", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "怀来县农产品仓储保鲜冷链设施项目", "prov": "河北", "city": "张家口市", "ti": 1.69, "bond": 1.2, "cov": 3.82, "score": 58, "rev": ["1#、2#厂房出租", "冷库及保鲜库出租", "净菜加工收入", "预制菜加工收入"], "status": "部分发行（前期已发3,000万元；本期3,000万元+后期6", "dom": ""}, {"id": "CCS-006", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "广东供销天业（廉江）冷链物流产业园", "prov": "广东", "city": "湛江市", "ti": 1.5, "bond": 1.2, "cov": 1.88, "score": 58, "rev": ["冷库租金（3元/吨·天，每3年递增3%，出租率60%→95%）", "冻冰袋销售（600吨/年×400元/吨）", "其他杂费（装卸/搬运/复冻/打膜/综合管理费，约为冷库租金的30%）", "冷库自营水产品（1,500吨/年×15,000元/吨×周转3次）"], "status": "已发行（2024年批次6,000万元+2025年批次6,00", "dom": ""}, {"id": "CCS-007", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "川东农特产品冷链集散交易中心建设项目", "prov": "四川", "city": "巴中市", "ti": 6.0, "bond": 3.0, "cov": 1.29, "score": 54, "rev": ["冷藏库出租（1.5元/㎡·日，出租率60%→90%）", "流通库出租（1元/㎡·日）", "高架库出租（1元/㎡·日）", "管理用房出租（0.8元/㎡·日）"], "status": "已发行2批次累计10,500万元（2025年2,500万+2", "dom": ""}, {"id": "CCS-008", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "宁阳早天下冷链（中国）交易基地项目", "prov": "山东", "city": "泰安市", "ti": 2.0, "bond": 1.6, "cov": 1.72, "score": 58, "rev": ["冷库仓储费（2024-2029年2.5元/㎡·天起分阶段上调至3元，使用率50%→90%）", "冷链交易平台使用费（1.4元/㎡·天起）", "电商孵化中心使用费（0.8元/㎡·天）"], "status": "已发行（2022年第四十四期16,000万元）", "dom": ""}, {"id": "CCS-009", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "聊城市经开区周公河冷链物流项目", "prov": "山东", "city": "聊城市", "ti": 2.54, "bond": 1.25, "cov": null, "score": 50, "rev": ["冷库租赁（稳定年约815.97万元/年）", "冷冻市场租金（稳定年约3,290.18万元/年）", "物业服务收入（稳定年约415.14万元/年）", "外墙广告位收入（约100万元/年）"], "status": "已发行（2020年10,000万元+2022年2,500万元", "dom": ""}, {"id": "CCS-010", "cat": "CCS", "catName": "农产品冷链仓储设施", "name": "夏邑县区域性农产品产地仓储冷链物流设施项目", "prov": "河南", "city": "商丘市", "ti": 1.8, "bond": 1.25, "cov": null, "score": 48, "rev": ["冷库（低温冷藏库）出租（17,000㎡，参考夏邑县冷库均价64元/㎡/月、谨慎按50元/㎡/月测算，每5年递增5%）", "保鲜库出租（17,000㎡，40元/㎡/月，每5年递增5元）", "信息中心及办公室出租（其他配套3,000㎡中对外租赁2,000㎡）"], "status": "已发行（2022年10,000万元；2024年2,500万元", "dom": ""}, {"id": "FPC-001", "cat": "FPC", "catName": "食品加工冷链园", "name": "粤港澳大湾区（广东·惠州）绿色农产品生产供应基地项目（二期）", "prov": "广东", "city": "惠州市博罗县", "ti": 38.5, "bond": 30.8, "cov": 2.13, "score": 90, "rev": ["加工销售收入", "厂房租赁", "冷库租赁", "贸易收入"], "status": "已核实：2021-2023年已发行203130万元，2024", "dom": ""}, {"id": "FPC-002", "cat": "FPC", "catName": "食品加工冷链园", "name": "永仁县农特产品深加工园区基础设施建设项目", "prov": "云南", "city": "楚雄州永仁县", "ti": 11.13, "bond": 7.5, "cov": 1.23, "score": 80, "rev": ["冷链仓库出租", "标准仓库出租", "转运仓库出租", "配套服务用房出租"], "status": "已核实：已发行66000万元，2026年拟再发行9000万元", "dom": ""}, {"id": "FPC-003", "cat": "FPC", "catName": "食品加工冷链园", "name": "德州食品科技产业园配套基础设施建设项目", "prov": "山东", "city": "德州市运河经济开发区", "ti": 8.85, "bond": 5.0, "cov": 2.0, "score": 74, "rev": ["车间及仓库出租", "冷库出租", "办公及研发楼出租", "职工餐厅出租"], "status": "已核实（专项评价报告原文）", "dom": ""}, {"id": "FPC-004", "cat": "FPC", "catName": "食品加工冷链园", "name": "洪雅县万亩粮经现代农业产业园建设项目", "prov": "四川", "city": "眉山市洪雅县", "ti": 8.0, "bond": 4.0, "cov": 1.21, "score": 74, "rev": ["加工标准厂房出租", "批发交易市场出租", "大棚特色经济农产品（生姜）销售", "水稻育秧盘出售"], "status": "已核实（专项评价报告PDF原文）：两期发行的实际成交记录未进", "dom": "file.finance.sina.com.cn"}, {"id": "FPC-005", "cat": "FPC", "catName": "食品加工冷链园", "name": "菏泽市农高区城乡冷链物流建设项目", "prov": "山东", "city": "菏泽市", "ti": 7.75, "bond": 3.1, "cov": 1.5, "score": 74, "rev": ["恒温仓库租赁", "低温仓库租赁", "物流仓库租赁", "科技研发服务中心等租赁"], "status": "已核实（专项评价报告PDF原文）：全要素已核实；实际发行成交", "dom": "file.finance.sina.com.cn"}, {"id": "FPC-006", "cat": "FPC", "catName": "食品加工冷链园", "name": "四川盐亭经济开发区绿色食品产业园项目", "prov": "四川", "city": "绵阳市盐亭县", "ti": 6.5, "bond": 4.8, "cov": 6.7, "score": 74, "rev": ["厂房/仓库/实验室出租", "检测用房出租", "中小企业园出租", "综合配套区出租"], "status": "已核实（专项评价报告PDF全文+县政府网两份文件）：收入12", "dom": "file.finance.sina.com.cn"}, {"id": "FPC-007", "cat": "FPC", "catName": "食品加工冷链园", "name": "滨州高新区食品产业园基础设施建设项目", "prov": "山东", "city": "滨州市高新区", "ti": 12.0, "bond": 2.3, "cov": null, "score": 72, "rev": ["标准化厂房整体租赁", "食品科技研创硅谷租赁", "检验检测中心租赁", "食品展销中心租赁"], "status": "已核实（实施方案原文）；实际发行批次利率与实施方案设定值的差", "dom": ""}, {"id": "FPC-008", "cat": "FPC", "catName": "食品加工冷链园", "name": "佛山市南海区预制菜产业园（九江园）项目", "prov": "广东", "city": "佛山市南海区", "ti": 10.0, "bond": 7.83, "cov": null, "score": 72, "rev": ["产业载体租金", "停车位", "广告灯箱", "广告牌"], "status": "已核实：已发行6000万元（2025-2026年4批次含2笔", "dom": ""}, {"id": "FPC-009", "cat": "FPC", "catName": "食品加工冷链园", "name": "中国（原阳）预制菜创新示范产业园项目（一期）", "prov": "河南", "city": "新乡市原阳县", "ti": 7.1, "bond": 5.0, "cov": null, "score": 69, "rev": ["生产加工区厂房出租", "冷链仓储区及其他物业出租", "充电桩及配套设施经营"], "status": "已核实：已发行46000万元（2024-2026年共5批次）", "dom": "yuanyang.gov.cn"}, {"id": "FPC-010", "cat": "FPC", "catName": "食品加工冷链园", "name": "浦城县食品产业园基础设施及配套服务工程", "prov": "福建", "city": "南平市浦城县", "ti": 4.94, "bond": 2.1, "cov": null, "score": 48, "rev": ["标准厂房出租", "办公用房和宿舍出租", "物业管理费"], "status": "已核实（实施方案PDF原文+县人大预算调整文件）", "dom": "file.finance.sina.com.cn"}, {"id": "STI-001", "cat": "STI", "catName": "现代食品科创园", "name": "黄河三角洲农业高新技术产业示范区基础设施建设工程", "prov": "山东", "city": "东营市", "ti": 26.0, "bond": 5.0, "cov": 1.8, "score": 85, "rev": ["房屋租赁及物业服务（可租10万㎡，租金2元/㎡·天+物业1元/㎡·天，满负荷10950万元/年，负荷率75%→95%）", "农机测试收入（年测试拖拉机300台次×5万元，参照洛阳西苑国家拖拉机质检中心收费标准）", "耐盐碱材料鉴定服务（温室/蒸渗仪/测坑/盐池科研设施，年鉴定2万份×1000元）", "育种科研服务（高标准育种繁育田1万亩×1500元/亩·年）"], "status": "已核实（专项评价报告全文读取，含10项收入测算明细、投资构成", "dom": "czt.shandong.gov.cn"}, {"id": "STI-002", "cat": "STI", "catName": "现代食品科创园", "name": "遂宁高新区数字农业种子种苗基地建设项目", "prov": "四川", "city": "遂宁市", "ti": 3.0, "bond": 2.2, "cov": null, "score": 73, "rev": ["高产水稻秧苗销售收入（700亩育苗区，约3996盘/亩，按5.5元/盘保守测算，每3年涨5%）", "高产玉米幼苗销售收入（300亩育苗区）", "停车费收入（600个停车位）", "充电桩服务费收入（100个充电桩）"], "status": "已核实（财务评价报告全文读取）；分年批次为申请发行计划，实际", "dom": "file.finance.sina.com.cn"}, {"id": "STI-003", "cat": "STI", "catName": "现代食品科创园", "name": "兰溪省级经开区（游埠）美食共富示范产业园及配套设施项目", "prov": "浙江", "city": "金华市", "ti": 17.0, "bond": 13.6, "cov": null, "score": 70, "rev": ["产业园厂房及美食产业运营用房出租", "美食示范研发体验中心经营收入", "配套住宿用房经营收入", "停车场等配套服务收入"], "status": "已核实（绩效自评报告全文读取）；2026/2027年批次为发", "dom": ""}, {"id": "STI-004", "cat": "STI", "catName": "现代食品科创园", "name": "东营市农高区大健康及功能性食品产业研究院暨中试基地项目", "prov": "山东", "city": "东营市", "ti": 5.5, "bond": 2.0, "cov": 1.29, "score": 69, "rev": ["研发楼出租", "实验室出租", "标准厂房出租/出售"], "status": "已核实（实施方案+专项评价报告关键页）；10年期限来自债券名", "dom": "czt.shandong.gov.cn"}, {"id": "STI-005", "cat": "STI", "catName": "现代食品科创园", "name": "吉林省现代种业产业园建设工程项目", "prov": "吉林", "city": "长春市", "ti": 4.45, "bond": 3.4, "cov": null, "score": 68, "rev": ["入驻企业租金（国际种业研发中心等楼宇出租）", "实验中心等公共服务配套收入", "人才中心及农技推广培训中心配套服务收入"], "status": "已核实（绩效评价报告全文读取）", "dom": ""}, {"id": "STI-006", "cat": "STI", "catName": "现代食品科创园", "name": "大竹县石河镇有机香椿复合产业园建设项目", "prov": "四川", "city": "达州市", "ti": 1.1, "bond": 0.88, "cov": 1.76, "score": 63, "rev": ["有机香椿复合产业园基地出租收入", "深加工现代化厂房出租收入", "保鲜仓库出租收入"], "status": "已核实（实施方案全文抓取）；分年发行额为实施方案计划口径", "dom": "dazhu.gov.cn"}, {"id": "STI-007", "cat": "STI", "catName": "现代食品科创园", "name": "邵武市拿口镇绿色农业（食品）产业园基础设施建设项目", "prov": "福建", "city": "南平市", "ti": 1.08, "bond": 0.7, "cov": null, "score": 60, "rev": ["厂房及库房出租收入（约22000㎡，35元/㎡·月，每5年增长2%）", "生活区出租收入（约2235㎡，40元/㎡·月，每5年增长2%）", "物业管理收入（2.0元/㎡·月）", "停车场收入（16个车位，215元/个·月）"], "status": "已核实（实施方案PDF全文抓取，含5批次发行日期/金额/利率", "dom": "file.finance.sina.com.cn"}, {"id": "STI-008", "cat": "STI", "catName": "现代食品科创园", "name": "黄三角农高区科技创新区基础设施提升工程项目", "prov": "山东", "city": "东营市", "ti": 2.27, "bond": 1.64, "cov": null, "score": 58, "rev": ["灌溉服务费（4万亩×200元/亩·年=800万元/年）", "土地租赁（4万亩×600元/亩·年=2400万元/年）", "自营藜麦种植销售（3000亩，两季800斤/亩×12元/斤=2880万元/年）"], "status": "已核实（专项评价报告全文读取）", "dom": ""}, {"id": "STI-009", "cat": "STI", "catName": "现代食品科创园", "name": "周宁县纯池镇食品产业园基础设施项目", "prov": "福建", "city": "宁德市", "ti": 2.04, "bond": 1.0, "cov": null, "score": 58, "rev": ["产业园配套用房（综合楼/宿舍楼）出租收入", "污水处理服务收入", "园区土地及载体运营收入"], "status": "已核实（实施方案PDF全文抓取+周宁县财政局2024年债务安", "dom": "file.finance.sina.com.cn"}, {"id": "STI-010", "cat": "STI", "catName": "现代食品科创园", "name": "海南热带果蔬科创基地", "prov": "海南", "city": "保亭黎族苗族自治县", "ti": 4.44, "bond": 2.9, "cov": 1.03, "score": 48, "rev": ["委托检验检测收入", "科研协作收入", "技术转让收入", "会展收入"], "status": "已核实（财务评价报告全文读取）；2025年后续9000万元及", "dom": "file.finance.sina.com.cn"}];
+const CATS = [["AWM","农产品批发市场"],["ALG","农产品物流园"],["CCS","农产品冷链仓储设施"],["FPC","食品加工冷链园"],["STI","现代食品科创园"],["CBE","跨境电商出海服务中心"]];
+const C = {}; CATS.forEach(c=>C[c[0]]=c[1]);
+let state = {cat:"", q:"", prov:"", ti:0, sort:"id", open:null};
+function fmt(n){return n.toLocaleString("zh-CN")}
+function pct(a,b){return Math.round(a/b*100)+"%"}
+/* KPI */
+const tiSum=CASES.reduce((s,c)=>s+c.ti,0), boSum=CASES.reduce((s,c)=>s+c.bond,0);
+const covs=CASES.filter(c=>c.cov).map(c=>c.cov);
+const bench=CASES.filter(c=>c.score>=80).length;
+const provs={}; CASES.forEach(c=>provs[c.prov]=(provs[c.prov]||0)+1);
+document.getElementById("kpis").innerHTML=[
+ ["60","案例总数"],[""+tiSum.toFixed(1)+"亿","总投资合计"],[""+boSum.toFixed(1)+"亿","专项债合计("+Math.round(boSum/tiSum*100)+"%)"],
+ [Object.keys(provs).length+"省","覆盖省份"],[covs.length+"例","披露覆盖倍数(均值"+(covs.reduce((a,b)=>a+b,0)/covs.length).toFixed(2)+")"],[bench+"个","标杆案例(≥80分)"]
+].map(k=>'<div class="kpi"><div class="v">'+k[0]+'</div><div class="l">'+k[1]+'</div></div>').join("");
+/* SVG bar chart helper */
+function hbar(el, rows, color, unit, valFmt){
+  const max=Math.max(...rows.map(r=>r[1]));
+  el.innerHTML=rows.map(r=>
+   '<div class="bar-row"><div class="bl" title="'+r[0]+'">'+r[0]+'</div><div class="btrack">'+
+   '<div class="bar '+color+'" style="width:'+(r[1]/max*100)+'%"></div></div>'+
+   '<div class="bv">'+(valFmt?valFmt(r[1]):r[1]+unit)+'</div></div>').join("");
+}
+/* category chart: double bars */
+const catAgg=CATS.map(c=>{const s=CASES.filter(x=>x.cat===c[0]);
+ return [c[1]+"("+s.length+")",s.reduce((a,x)=>a+x.ti,0),s.reduce((a,x)=>a+x.bond,0)];});
+const catMax=Math.max(...catAgg.map(r=>r[1]));
+document.getElementById("catChart").innerHTML=catAgg.map(r=>
+ '<div class="bar-row"><div class="bl">'+r[0]+'</div><div class="btrack">'+
+ '<div class="bar ti" style="width:'+(r[1]/catMax*100)+'%"></div>'+
+ '<div class="bar bond" style="width:'+(r[2]/catMax*100)+'%"></div></div>'+
+ '<div class="bv">'+r[1].toFixed(0)+'/'+r[2].toFixed(0)+'</div></div>').join("");
+hbar(document.getElementById("provChart"), Object.entries(provs).sort((a,b)=>b[1]-a[1]), "ti", "例");
+hbar(document.getElementById("topChart"),
+ CASES.slice().sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id)).slice(0,10)
+ .map(c=>[c.name.slice(0,14)+"…("+c.id+")", c.score]), "bond", "分");
+/* cov histogram: bins 1.0-1.5-2.0-2.5-3-5-8-14 */
+const bins=[[1.0,1.5],[1.5,2.0],[2.0,2.5],[2.5,3.0],[3.0,5.0],[5.0,8.0],[8.0,14.01]];
+const binCnt=bins.map(b=>covs.filter(v=>v>=b[0]&&v<b[1]).length);
+document.getElementById("covChart").innerHTML=bins.map((b,i)=>
+ '<div class="bar-row"><div class="bl">'+b[0].toFixed(1)+"–"+b[1].toFixed(1)+'</div>'+
+ '<div class="btrack"><div class="bar ti" style="width:'+(binCnt[i]/Math.max(...binCnt)*100)+'%"></div></div>'+
+ '<div class="bv">'+binCnt[i]+'例</div></div>').join("")+
+ '<div class="legend">离群值：宁波二期13.66(打包口径)、盐亭6.7、怀来3.82——口径见报告第七章</div>';
+/* tabs */
+const tabs=[["","全部(60)"]].concat(CATS.map(c=>[c[0],c[1]+"(10)"]));
+const tabsEl=document.getElementById("tabs");
+tabsEl.innerHTML=tabs.map((t,i)=>'<button class="tab'+(i===0?" on":"")+'" data-c="'+t[0]+'">'+t[1]+'</button>').join("");
+tabsEl.onclick=e=>{if(e.target.dataset.c===undefined)return;
+ state.cat=e.target.dataset.c;tabsEl.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b===e.target));render();};
+/* prov select */
+Object.keys(provs).sort().forEach(p=>{const o=document.createElement("option");o.value=p;o.textContent=p+"("+provs[p]+")";document.getElementById("provSel").appendChild(o);});
+["q","provSel","tiSel","sortSel"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{render();}));
+document.querySelectorAll("th[data-k]").forEach(th=>th.addEventListener("click",()=>{state.sort=th.dataset.k;render();}));
+/* render table */
+function render(){
+ let list=CASES.slice();
+ if(state.cat)list=list.filter(c=>c.cat===state.cat);
+ const q=document.getElementById("q").value.trim();
+ if(q)list=list.filter(c=>(c.name+c.rev.join("")).includes(q));
+ const pv=document.getElementById("provSel").value;
+ if(pv)list=list.filter(c=>c.prov===pv);
+ const tv=parseFloat(document.getElementById("tiSel").value);
+ if(tv)list=list.filter(c=>c.ti>=tv);
+ const s=document.getElementById("sortSel").value;
+ const key=s.replace("-",""),desc=s.endsWith("-");
+ list.sort((a,b)=>{let x=a[key]??-1,y=b[key]??-1;
+  if(typeof x==="string")return desc?y.localeCompare(x):x.localeCompare(y);
+  return desc?y-x:x-y;});
+ const tb=document.getElementById("tbody");
+ tb.innerHTML=list.map(c=>{
+  const star=c.score>=80?'<span class="star">⭐</span>':"";
+  const main='<tr class="case" data-id="'+c.id+'"><td>'+c.id+'</td><td>'+c.name+star+'</td><td>'+c.prov+"·"+c.city+'</td>'+
+   '<td>'+c.ti.toFixed(2)+'</td><td>'+c.bond.toFixed(2)+'</td><td>'+pct(c.bond,c.ti)+'</td>'+
+   '<td>'+(c.cov?c.cov.toFixed(2):'<span class="cov-na">—</span>')+'</td><td><b>'+c.score+'</b></td><td class="cov-na">'+(c.dom||"—")+'</td></tr>';
+  const det='<tr class="detail" style="display:none"><td colspan="9"><b>主要收益来源：</b>'+
+   (c.rev.length?c.rev.map(r=>"▪"+r).join("　"):"—")+'<br><b>状态：</b>'+(c.status||"—")+'</td></tr>';
+  return main+det;}).join("");
+ document.getElementById("cnt").textContent="共 "+list.length+" 条（点击行展开收益来源）";
+ tb.onclick=e=>{const tr=e.target.closest("tr.case");if(!tr)return;
+  const d=tr.nextElementSibling;d.style.display=d.style.display==="none"?"":"none";};
+}
+render();
+</script>
+</body>
+</html>
